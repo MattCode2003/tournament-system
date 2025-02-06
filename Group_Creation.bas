@@ -88,15 +88,18 @@ Sub SnakeDraw(numberOfEntries As Integer, groupSize As Integer, numberOfGroups A
     Dim groupNumber As Integer
     Dim firstEmptyColumn As Long
     Dim i As Integer
+    Dim positionInGroup As Integer
     Dim direction As Integer
     Dim licenceNumberGroup() As Variant
     Dim playerGroup() As String
     Dim countyGroup() As String
+    Dim newGroupInfomation(1 To 3) As Integer
 
     ' Initialize variables
     straightToKO = Cells(numberOfEntries + 2, 2)
     firstEmptyColumn = Cells(1, Columns.Count).End(xlToLeft).Column + 1
     groupNumber = 1
+    groupPosition = 1
     direction = 1
     ReDim licenceNumberGroup(1 To numberOfGroups, 1 To groupSize)
     ReDim playerGroup(1 To numberOfGroups, 1 To groupSize)
@@ -104,20 +107,54 @@ Sub SnakeDraw(numberOfEntries As Integer, groupSize As Integer, numberOfGroups A
     
     ' Adds the top seeds in each group
     For i = 2 To numberOfGroups + 1
-        licenceNumberGroup(i - 1, 1) = Cells(i, 1)
-        playerGroup(i - 1, 1) = Cells(i, 2)
-        countyGroup(i - 1, 1) = Cells(i, 3)
+        licenceNumberGroup(i - 1, groupPosition) = Cells(i, 1)
+        playerGroup(i - 1, groupPosition) = Cells(i, 2)
+        countyGroup(i - 1, groupPosition) = Cells(i, 3)
 
         groupNumber = groupNumber + direction
     Next i
 
+    groupPosition = groupPosition + 2
     direction = -1
 
     ' Does the remaining players
-    For i = i + 1 To numberOfEntries + 1
+    For i = i + 1 To numberOfEntries
+        ' check if the current space is taken
+        ' this will be because of county clashes
+        Do Until playerGroup(groupNumber, groupPosition) = ""
+            newGroupInfomation = ChangeGroup(groupNumber, groupPosition, numberOfGroups, direction)
+            groupNumber = newGroupInfomation(1)
+            groupPosition = newGroupInfomation(2)
+            direction = newGroupInfomation(3)
+        Loop
+
+        ' Checks if there is a county clash
     Next i
 
 End Sub
+
+' Calculates the next group and the position in that group
+Function ChangeGroup(groupNumber As Integer, groupPosition As Integer, numberOfGroups As Integer, direction As Integer) As Variant
+    Dim results(1 To 3) As Integer
+ 
+    If groupNumber = 1 And direction = -1 Then
+        results(1) = groupNumber
+        results(2) = groupPosition + 1
+        results(3) = 1
+    ElseIf groupNumber = numberOfGroups And direction = 1 Then
+        results(1) = groupNumber
+        results(2) = groupPosition + 1
+        results(3) = -1
+    Else
+        results(1) = groupNumber + direction
+        results(2) = groupPosition
+        results(3) = direction
+    End If
+    
+    ChangeGroup = results
+        
+End Function
+
 
 Sub RandomDraw()
 End Sub
