@@ -89,20 +89,32 @@ Sub SnakeDraw(numberOfEntries As Integer, groupSize As Integer, numberOfGroups A
     Dim firstEmptyColumn As Long
     Dim i As Integer
     Dim direction As Integer
+    Dim licenceNumberGroup() As Variant
+    Dim playerGroup() As String
+    Dim countyGroup() As String
 
     ' Initialize variables
     straightToKO = Cells(numberOfEntries + 2, 2)
     firstEmptyColumn = Cells(1, Columns.Count).End(xlToLeft).Column + 1
     groupNumber = 1
     direction = 1
+    ReDim licenceNumberGroup(1 To numberOfGroups, 1 To groupSize)
+    ReDim playerGroup(1 To numberOfGroups, 1 To groupSize)
+    ReDim countyGroup(1 To numberOfGroups, 1 To groupSize)
     
     ' Adds the top seeds in each group
     For i = 2 To numberOfGroups + 1
-        Cells(i, firstEmptyColumn).Value = Cells(i, 1)
-        Cells(i, firstEmptyColumn + 1).Value = Cells(i, 2)
-        Cells(i, firstEmptyColumn + 2).Value = Cells(i, 3)
+        licenceNumberGroup(i - 1, 1) = Cells(i, 1)
+        playerGroup(i - 1, 1) = Cells(i, 2)
+        countyGroup(i - 1, 1) = Cells(i, 3)
 
-        groupNumber = groupNumber + 1
+        groupNumber = groupNumber + direction
+    Next i
+
+    direction = -1
+
+    ' Does the remaining players
+    For i = i + 1 To numberOfEntries + 1
     Next i
 
 End Sub
