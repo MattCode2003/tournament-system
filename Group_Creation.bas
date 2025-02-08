@@ -60,7 +60,7 @@ Sub CreateGroups()
 
         ' Creates draw using either random or snaked groups
         If snake Then
-            SnakeDraw numberOfEntries, groupSize, numberOfGroups
+            SnakeDraw numberOfEntries, numberOfGroups
         Else
             ' RandomDraw()
             End
@@ -68,6 +68,7 @@ Sub CreateGroups()
     Loop
 
 End Sub
+
 
 ' Calculates the number of recommended seeds
 Private Function RecommendedSeedNumbers(numberOfEntries As Integer) As Integer
@@ -83,55 +84,77 @@ Private Function RecommendedSeedNumbers(numberOfEntries As Integer) As Integer
 End Function
 
 
-Sub SnakeDraw(numberOfEntries As Integer, groupSize As Integer, numberOfGroups As Integer)
-    Dim straightToKO As Integer
-    Dim groupNumber As Integer
-    Dim firstEmptyColumn As Long
+' Adjusted Snake System with Even Group Distribution
+Sub SnakeDraw(numberOfEntries As Integer, numberOfGroups As Integer)
+    Dim players As Collection
+    Dim groups() As Collection
     Dim i As Integer
-    Dim positionInGroup As Integer
+    Dim groupNumber As Integer, groupPosition As Integer
     Dim direction As Integer
-    Dim licenceNumberGroup() As Variant
-    Dim playerGroup() As String
-    Dim countyGroup() As String
-    Dim newGroupInfomation(1 To 3) As Integer
+    Dim player As Object
+    Dim results As Variant
 
-    ' Initialize variables
-    straightToKO = Cells(numberOfEntries + 2, 2)
-    firstEmptyColumn = Cells(1, Columns.Count).End(xlToLeft).Column + 1
+    ' Get Players
+    Set players = CreatePlayers(numberOfEntries)
+    
+    ' Initialize groups (each group is a collection)
+    ReDim groups(1 To numberOfGroups)
+    For i = 1 To numberOfGroups
+        Set groups(i) = New Collection
+    Next i
+
+    ' Initialize variables for group and position
     groupNumber = 1
     groupPosition = 1
-    direction = 1
-    ReDim licenceNumberGroup(1 To numberOfGroups, 1 To groupSize)
-    ReDim playerGroup(1 To numberOfGroups, 1 To groupSize)
-    ReDim countyGroup(1 To numberOfGroups, 1 To groupSize)
-    
-    ' Adds the top seeds in each group
-    For i = 2 To numberOfGroups + 1
-        licenceNumberGroup(i - 1, groupPosition) = Cells(i, 1)
-        playerGroup(i - 1, groupPosition) = Cells(i, 2)
-        countyGroup(i - 1, groupPosition) = Cells(i, 3)
+    direction = 1 ' Start by filling groups in a forward direction (1)
 
-        groupNumber = groupNumber + direction
+    ' Distribute players into groups using the snake system
+    For Each player In players
+        ' Add player to the current group
+        groups(groupNumber).Add player
+        
+        ' Determine the next group and position using the snake system
+        results = ChangeGroup(groupNumber, groupPosition, numberOfGroups, direction)
+        groupNumber = results(1)
+        groupPosition = results(2)
+        direction = results(3)
+    Next player
+
+    ' For debugging or verification purposes, print group assignments
+    Dim column As Integer
+    For i = 1 To numberOfGroups
+        column = Cells(1, Columns.Count).End(xlToLeft).Column + 1
+        For Each player In groups(i)
+            Cells(i + 1, column).Value = player.LicenceNumber
+            column = column + 1
+            Cells(i + 1, column).Value = player.Name
+            column = column + 1
+            Cells(i + 1, Column).Value = player.Association
+            column = column + 1
+        Next Player
     Next i
-
-    groupPosition = groupPosition + 2
-    direction = -1
-
-    ' Does the remaining players
-    For i = i + 1 To numberOfEntries
-        ' check if the current space is taken
-        ' this will be because of county clashes
-        Do Until playerGroup(groupNumber, groupPosition) = ""
-            newGroupInfomation = ChangeGroup(groupNumber, groupPosition, numberOfGroups, direction)
-            groupNumber = newGroupInfomation(1)
-            groupPosition = newGroupInfomation(2)
-            direction = newGroupInfomation(3)
-        Loop
-
-        ' Checks if there is a county clash
-    Next i
-
 End Sub
+
+
+
+
+Private Function CreatePlayers(numberOfEntries As Integer) As Collection
+    Dim players As New Collection
+    Dim p As Player
+    Dim i As Integer
+
+    For i = 2 + Cells(numberOfEntries + 2, 2).Value To numberOfEntries + 1
+        Set p = New Player
+        p.LicenceNumber = Cells(i, 1)
+        p.Name = Cells(i, 2)
+        p.Association = Cells(i, 3)
+        
+        players.Add p
+    Next i
+
+    Set CreatePlayers = players
+End Function
+
 
 ' Calculates the next group and the position in that group
 Function ChangeGroup(groupNumber As Integer, groupPosition As Integer, numberOfGroups As Integer, direction As Integer) As Variant
@@ -151,8 +174,7 @@ Function ChangeGroup(groupNumber As Integer, groupPosition As Integer, numberOfG
         results(3) = direction
     End If
     
-    ChangeGroup = results
-        
+    ChangeGroup = results 
 End Function
 
 
