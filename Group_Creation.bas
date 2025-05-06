@@ -133,6 +133,7 @@ Sub SnakeDraw(numberOfEntries As Integer, numberOfGroups As Integer)
             column = column + 1
         Next Player
     Next i
+    AssociationClash groups, numberOfEntries, numberOfGroups
 End Sub
 
 
@@ -157,7 +158,7 @@ End Function
 
 
 ' Calculates the next group and the position in that group
-Function ChangeGroup(groupNumber As Integer, groupPosition As Integer, numberOfGroups As Integer, direction As Integer) As Variant
+Private Function ChangeGroup(groupNumber As Integer, groupPosition As Integer, numberOfGroups As Integer, direction As Integer) As Variant
     Dim results(1 To 3) As Integer
  
     If groupNumber = 1 And direction = -1 Then
@@ -177,6 +178,45 @@ Function ChangeGroup(groupNumber As Integer, groupPosition As Integer, numberOfG
     ChangeGroup = results 
 End Function
 
+
+Sub AssociationClash(groups() As Collection, numberOfEntries As Integer, numberOfGroups As Integer)
+    Dim groupNumber As Integer
+    Dim groupPosition As Integer
+    Dim direction As Integer
+    Dim i As Integer
+    Dim j As Integer
+    Dim association As String
+    Dim clash As Boolean
+    Dim newGroup As Integer
+    Dim newPosition As Integer
+    Dim newDirection As Integer
+
+    ' Initialize variables
+    groupNumber = numberOfGroups
+    groupPosition = 2
+    direction = -1
+
+    ' goes through the groups in the same way as snake system
+    For i = numberOfGroups + 1 To numberOfEntries
+        ' gets the specific players association
+        association = groups(groupNumber).Item(groupPosition).Association
+
+        ' Goes through all the previous players in the same group
+        ' to find any clashes
+        clash = False
+        For j = 1 To groupPosition - 1
+            If association = groups(groupNumber).Item(j).Association Then
+                clash = True
+                Exit For
+            End If
+        Next j
+
+        ' if there is a clash then search through the groups using the changegroup sub
+        ' to find a group where there is no clash
+        ' once a group is found put the player in that group and position
+        ' this moves everyone else down a group/position
+    Next i
+End Sub
 
 Sub RandomDraw()
 End Sub

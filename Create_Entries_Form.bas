@@ -82,7 +82,7 @@ Sub Create_Entries_Form()
         event_name = EventSettings.Range("J" & x).Value
         event_included = EventSettings.Range("B" & x).Value
         If IsEmpty(event_name) Then Exit Do
-        If event_included = 1 Then
+        If Not IsEmpty(event_included) Then
             With Cells(1, i)
                 .Value = event_name
                 .HorizontalAlignment = xlCenter
@@ -152,6 +152,8 @@ Sub Create_Entries_Form()
 
     ' Birthday formatting for age group events
     For x = 10 To i - 5
+
+        ' Gets category age
         If Cells(1, x).Value = "JB" Or Cells(1, x).Value = "JG" Then
             age_category = 19
         ElseIf Cells(1, x).Value = "CB" Or Cells(1, x).Value = "CG" Then
@@ -175,9 +177,56 @@ Sub Create_Entries_Form()
             End If
 
             column_letter = Split(Cells(1, x).Address, "$")(1)
+
+            ' Highlight yellow if black condition is met AND cell has a value
             Set rng = Range(column_letter & "2:" & column_letter & entrant_number + 3)
+            With rng.FormatConditions.Add(Type:=xlExpression, Formula1:="=AND(F2<>"""", YEAR(F2)<" & birth_year & ", " & Cells(2, x).Address(False, False) & "<>"""")")
+                .Interior.Color = RGB(255, 255, 0) ' Yellow
+                .StopIfTrue = True ' Prevent lower rules from applying
+            End With
+
+            
             With rng.FormatConditions.Add(Type:=xlExpression, Formula1:="=AND(F2<>"""", YEAR(F2)<" & birth_year & ")")
                 .Interior.Color = RGB(0, 0, 0)
+                .StopIfTrue = False
+            End With
+        End If
+
+        column_letter = Split(Cells(1, x).Address, "$")(1)
+
+
+        ' Gender Formatting
+        ' If player is male
+        If InStr(1, Cells(1, x).Value, "B", vbTextCompare) or InStr(1, Cells(1, x).Value, "M", vbTextCompare) Then
+            Set rng = Range(column_letter & "2:" & column_letter & entrant_number + 3)
+
+            ' Sets background to yellow if invalid entry
+            With rng.FormatConditions.Add(Type:=xlExpression, Formula1:="=AND(H2<>"""", H2<>""M"", " & column_letter & "2<>"""")")
+                .Interior.Color = RGB(255, 255, 0)
+                .StopIfTrue = True
+            End With
+
+            ' Sets background to black if not eligable
+            With rng.FormatConditions.Add(Type:=xlExpression, Formula1:="=AND(H2<>"""", H2<>""M"")")
+                .Interior.Color = RGB(0, 0, 0)
+                .StopIfTrue = False
+            End With
+        End If
+
+        ' If player is female
+        If InStr(1, Cells(1, x).Value, "G", vbTextCompare) or InStr(1, Cells(1, x).Value, "W", vbTextCompare) Then
+            Set rng = Range(column_letter & "2:" & column_letter & entrant_number + 3)
+
+            ' Sets background to yellow if invalid entry
+            With rng.FormatConditions.Add(Type:=xlExpression, Formula1:="=AND(H2<>"""", H2<>""F"", " & column_letter & "2<>"""")")
+                .Interior.Color = RGB(255, 255, 0)
+                .StopIfTrue = True
+            End With
+
+            ' Sets background to black if not eligable
+            With rng.FormatConditions.Add(Type:=xlExpression, Formula1:="=AND(H2<>"""", H2<>""F"")")
+                .Interior.Color = RGB(0, 0, 0)
+                .StopIfTrue = False
             End With
         End If
     Next x
