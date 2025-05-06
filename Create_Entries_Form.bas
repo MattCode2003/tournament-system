@@ -25,7 +25,7 @@ Sub Create_Entries_Form()
     
     
     entrant_number = 301
-    Set general_settings = Workbooks("Main.xlsm").Worksheets("General Settings")
+    Set general_settings = Workbooks("main.xlsm").Worksheets("General Settings")
 
     filePath = ThisWorkbook.path & UtilityFunctions.GetDelimiter(ThisWorkbook.Path) & "data.xlsx"
 
@@ -78,7 +78,7 @@ Sub Create_Entries_Form()
     Next i
 
     ' Event titles from "Event Settings"
-    Set EventSettings = Workbooks("Main.xlsm").Worksheets("Event Settings")
+    Set EventSettings = Workbooks("main.xlsm").Worksheets("Event Settings")
 
     x = 3
     Do
