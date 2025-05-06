@@ -19,6 +19,9 @@ Sub Create_Entries_Form()
     Dim comp_month As Integer
     Dim comp_year As Integer
     Dim birth_year As Integer
+    Dim row As Integer
+    Dim formula_string As String
+    Dim or_condition As String
     
     
     entrant_number = 301
@@ -230,6 +233,74 @@ Sub Create_Entries_Form()
             End With
         End If
     Next x
+
+
+    ' Adds the price of each event to the worksheet
+    With Cells(1, i + 10)
+        .Value = "Category"
+        .HorizontalAlignment = xlCenter
+    End With
+    With Cells(1, i + 11)
+        .Value = "Price"
+        .HorizontalAlignment = xlCenter
+    End With
+
+    x = 3
+    row = 2
+    Do
+        event_name = EventSettings.Range("J" & x).Value
+        event_included = EventSettings.Range("B" & x).Value
+        If IsEmpty(event_name) Then Exit Do
+        If Not IsEmpty(event_included) Then
+            With Cells(row, i + 10)
+                .Value = event_name
+                .HorizontalAlignment = xlCenter
+            End With
+            With Cells(row, i + 11)
+                .Value = event_included
+                .HorizontalAlignment = xlCenter
+                .Font.Size = 8
+                .Font.Name = "Arial"
+            End With
+            row = row + 1
+        End If
+
+        x = x + 1
+    Loop
+    
+    ' Adds the price of the admin fee
+    with Cells(row, i + 10)
+        .Value = "Admin"
+        .HorizontalAlignment = xlCenter
+    End With
+    with Cells(row, i + 11)
+        .Value = EventSettings.Cells(x + 2, 2)
+        .HorizontalAlignment = xlCenter
+        .Font.Size = 8
+        .Font.Name = "Arial"
+    End With
+
+    Columns(i + 10).ColumnWidth = 7
+    Columns(i + 11).ColumnWidth = 7
+
+    ' Creates the formula for the entries
+    formula_string = "=SUM("
+    or_condition = ""
+    For x = 10 to i - 5
+        formula_string = formula_string & "IF(" & Cells(2, x).Address(False, False) & "<>"""", " & _
+                        Cells(x - 8, i + 11).Address(False, False) & ", 0), "
+        or_condition = or_condition + Cells(2, x).Address(False, False) & "<>"""", "
+    Next x
+    
+    
+    or_condition = Left(or_condition, Len(or_condition) - 2)  ' Remove trailing comma and space
+    formula_string = formula_string & "IF(OR(" & or_condition & "), " & Cells(row, i + 11) & ", 0))"
+
+
+    ' Creates the formula for the entries
+    column_letter = Split(Cells(1, i - 4).Address, "$")(1)
+    Set rng = Range(column_letter & "2:" & column_letter & entrant_number + 3)
+    rng.Formula = formula_string
 
     '=========================== Footer ================================
 
