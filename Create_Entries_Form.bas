@@ -288,7 +288,7 @@ Sub Create_Entries_Form()
     or_condition = ""
     For x = 10 to i - 5
         formula_string = formula_string & "IF(" & Cells(2, x).Address(False, False) & "<>"""", " & _
-                        Cells(x - 8, i + 11).Address(False, False) & ", 0), "
+                        Cells(x - 8, i + 11).Address(True, True) & ", 0), "
         or_condition = or_condition + Cells(2, x).Address(False, False) & "<>"""", "
     Next x
     
