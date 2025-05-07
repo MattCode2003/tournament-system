@@ -55,3 +55,24 @@ Public Function FileExists(filePath As String) As Boolean
         FileExists = True
     End If
 End Function
+
+
+'=============================== Check Sheet Name ==============================
+
+
+' Checks the workbook to see if a sheet name contains a string
+Public Function CheckSheetNames(wb As Workbook, str As String) As Boolean
+    Dim contains_form As Boolean
+    Dim ws As Worksheet
+
+    contains_form = False
+
+    For Each ws In wb.Worksheets
+        If InStr(1, ws.Name, str, vbTextCompare) > 0 Then
+            contains_form = True
+            Exit For
+        End If
+    Next ws
+
+    CheckSheetNames = contains_form
+End Function

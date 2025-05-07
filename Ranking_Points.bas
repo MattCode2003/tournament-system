@@ -21,14 +21,30 @@ Sub PlayerRankings()
     Dim fso As Object
     Dim numberOfEntries As Integer
     Dim category As String
+    Dim user_response As String
+    Dim contains_form As Boolean
+    Dim should_delete_sheets As Boolean
     
     ' Initialize file paths and check for files
     DataFilePath = ThisWorkbook.path & UtilityFunctions.GetDelimiter(ThisWorkbook.path) & DATA_FILE_NAME
     AlphaListFilePath = GetAlphaListFilePath(ThisWorkbook.path & UtilityFunctions.GetDelimiter(ThisWorkbook.path), ALPHA_FILE_PATTERN)
-    
+
+    ' Checks if data.xlsx and Alpha List exists
     If Not UtilityFunctions.FileExists(DataFilePath) Then Exit Sub
     If Not UtilityFunctions.FileExists(AlphaListFilePath) Then Exit Sub
-    
+
+    Application.ScreenUpdating = False
+    Set wb = Workbooks.Open(DataFilePath)
+    ' Show warning if rankings aready gotten
+    If (contains_form And wb.Worksheets.Count > 2) Or (Not contains_form And wb.Worksheets.Count > 1)Then
+        user_response = MsgBox("If you have already gotten their rankings it will delete them and redo it. "& vbCrLf & _
+                                "Are you sure you want to continue?", vbYesNo + vbExclamation, "Warning")
+        If user_response = vbNo Then Exit Sub
+
+        ' Delete extra sheets
+        Call DeleteSheets(wb)
+    End If
+
     ' Request password if necessary
     cancelPressed = False
     AlphaListPasswordInputForm.Show
@@ -38,6 +54,21 @@ Sub PlayerRankings()
     Set wb = Workbooks.Open(DataFilePath)
     Set entrants = wb.Worksheets("MASTER")
     numberOfEntries = GetNumberOfEntries(entrants)
+
+    ' Check if there is a microsoft form being used
+    contains_form = UtilityFunctions.CheckSheetNames(wb, "Form")
+
+    ' Show warning if rankings aready gotten
+    If (contains_form And wb.Worksheets.Count > 2) Or (Not contains_form And wb.Worksheets.Count > 1)Then
+        user_response = MsgBox("If you have already gotten their rankings it will delete them and redo it. "& vbCrLf & _
+                                "Are you sure you want to continue?", vbYesNo + vbExclamation, "Warning")
+        If user_response = vbNo Then Exit Sub
+
+        ' Delete extra sheets
+        Call DeleteSheets(wb)
+    End If
+
+    Exit Sub
 
     currentColumn = 10
     Do While Not IsEmpty(entrants.Cells(1, currentColumn)) And entrants.Cells(1, currentColumn).Value <> "Entry"
@@ -195,3 +226,19 @@ Private Function GetAlphaListFilePath(folderPath As String, filePattern As Strin
     
     GetAlphaListFilePath = "" ' Return empty string if no file is found
 End Function
+
+' Deletes the sheets that arent needed
+Private Sub DeleteSheets(wb As Workbook)
+    Dim i As Long
+    
+    ' Turn off alerts to prevent confirmation messages
+    Application.DisplayAlerts = False
+
+    ' Loop backwards from the last sheet to the third one
+    For i = wb.Sheets.Count To 3 Step -1
+        wb.Sheets(i).Delete
+    Next i
+
+    ' Turn alerts back on
+    Application.DisplayAlerts = True
+End Sub
