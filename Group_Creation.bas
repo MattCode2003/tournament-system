@@ -121,6 +121,7 @@ Sub SnakeDraw(numberOfEntries As Integer, numberOfGroups As Integer)
     Next player
 
     ' For debugging or verification purposes, print group assignments
+    ' Currently it adds the groups to the sheet
     Dim column As Integer
     For i = 1 To numberOfGroups
         column = Cells(1, Columns.Count).End(xlToLeft).Column + 1
@@ -133,6 +134,8 @@ Sub SnakeDraw(numberOfEntries As Integer, numberOfGroups As Integer)
             column = column + 1
         Next Player
     Next i
+
+
     AssociationClash groups, numberOfEntries, numberOfGroups
 End Sub
 
