@@ -47,20 +47,25 @@ Sub CreateGroups()
             seeds = Int(InputBox("How many seeds are there?", "Number of Seeds", Str(recommendedSeeds - straightToKO)))
         End If
         groupSize = Int(InputBox("How many players is in a normal group", "Group Size", Str(4)))
-        
-        If numberOfEntries Mod groupSize <> 0 Then
+
+        ' Calculates the number of groups needed        
+        If numberOfEntries Mod groupSize = 0 Then
+            numberOfGroups = numberOfEntries \ groupSize
+        Else
             smallerGroupSize = (MsgBox("Do spare players result in smaller groups?", _
                 vbYesNo + vbDefaultButton2, "Smaller Group Sizes") = vbYes)
+            
+            If smallerGroupSize Then
+                numberOfGroups = (numberOfEntries \ groupSize) + 1
+            Else
+                numberOfGroups = numberOfEntries \ groupSize
+                groupSize = (numberOfEntries + numberOfGroups - 1) \ numberOfGroups
+            End If
         End If
-
-        ' Calculates the number of groups needed
-        numberOfGroups = numberOfEntries \ groupSize
-        If smallerGroupSize Then numberOfGroups = numberOfGroups + 1
-        If Not smallerGroupSize Then groupSize = groupSize + 1
 
         ' Creates draw using either random or snaked groups
         If snake Then
-            SnakeDraw numberOfEntries, numberOfGroups
+            SnakeDraw numberOfEntries, numberOfGroups, groupSize
         Else
             ' RandomDraw()
             End
@@ -85,63 +90,112 @@ End Function
 
 
 ' Adjusted Snake System with Even Group Distribution
-Sub SnakeDraw(numberOfEntries As Integer, numberOfGroups As Integer)
+Sub SnakeDraw(number_of_entries As Integer, number_of_groups As Integer, max_group_size As Integer)
     Dim players As Collection
-    Dim groups() As Collection
+    Dim groups() As Variant
     Dim i As Integer
-    Dim groupNumber As Integer, groupPosition As Integer
-    Dim direction As Integer
-    Dim player As Object
-    Dim results As Variant
-
-    ' Get Players
-    Set players = CreatePlayers(numberOfEntries)
+    Dim j As Integer
+    Dim snake_path() As Variant
+    Dim player As Player
+    Dim location As Integer
+    Dim group As Integer
+    Dim position As Integer
+    Dim stored_location As Integer
+    Dim clash As Boolean
     
-    ' Initialize groups (each group is a collection)
-    ReDim groups(1 To numberOfGroups)
-    For i = 1 To numberOfGroups
-        Set groups(i) = New Collection
+    ' === Get Players ===
+    Set players = CreatePlayers(number_of_entries)
+    
+    ' === Initialize groups (2D Array) ===
+    ReDim groups(1 To number_of_groups)
+    For i = 1 To number_of_groups
+        Dim inner_array() As Variant
+        ReDim inner_array(1 To max_group_size)
+
+        ' Initalise each position in the inner array with a new player object
+        For J = 1 To max_group_size
+            Set inner_array(j) = New Player
+        Next J
+
+        groups(i) = inner_array
     Next i
 
-    ' Initialize variables for group and position
-    groupNumber = 1
-    groupPosition = 1
-    direction = 1 ' Start by filling groups in a forward direction (1)
 
-    ' Distribute players into groups using the snake system
-    For Each player In players
-        ' Add player to the current group
-        groups(groupNumber).Add player
+
+    ' === Build Snake Path ===
+    snake_path = BuildSnakePath(number_of_groups, max_group_size)
+
+    ' === Assign players to groups ===
+    location = 1
+    For i = 1 To number_of_entries
+
+        ' If location occupied then move to the next avaiable location
+        While groups(snake_path(location, 1))(snake_path(location, 2)).Name <> ""
+            location = location + 1
+        Wend
+
+        ' Gets the player
+        Set player = players(i)
+
+        group = snake_path(location, 1)
+        position = snake_path(location, 2)
+
+        ' Checks for Association Clash
+        If HasAssociationClash(groups(group), player.Association) > 0 Then
+            clash = True
+            stored_location = location
+            Do
+                location = location + 1
+                group = snake_path(location, 1)
+                position = snake_path(location, 2)
+                
+
+                If HasAssociationClash(groups(group), player.Association) = 0 Then
+                    Set groups(group)(position) = player
+                    location = stored_location
+                    clash = False
+                
+                ElseIf location = stored_location + 10 Or location = number_of_groups * max_group_size Then
+                    location = stored_location
+                    group = snake_path(location, 1)
+                    position = snake_path(location, 2)
+                    Set groups(group)(position) = player
+                    location = location + 1
+                    clash = False
+                End If
+                    
+            Loop While clash = True
         
-        ' Determine the next group and position using the snake system
-        results = ChangeGroup(groupNumber, groupPosition, numberOfGroups, direction)
-        groupNumber = results(1)
-        groupPosition = results(2)
-        direction = results(3)
-    Next player
+        ' what to do when there isnt an association clash
+        Else
+            Set groups(group)(position) = player
+            location = location + 1
+        End If
 
-    ' For debugging or verification purposes, print group assignments
-    ' Currently it adds the groups to the sheet
+    Next i
+
+
+    ' puts the groups on excel
     Dim column As Integer
-    For i = 1 To numberOfGroups
+    For i = 1 To number_of_groups
         column = Cells(1, Columns.Count).End(xlToLeft).Column + 1
-        For Each player In groups(i)
+        Dim p As Integer
+        For p = LBound(groups(i)) To UBound(groups(i))
+            Set player = groups(i)(p)
             Cells(i + 1, column).Value = player.LicenceNumber
             column = column + 1
             Cells(i + 1, column).Value = player.Name
             column = column + 1
-            Cells(i + 1, Column).Value = player.Association
+            Cells(i + 1, column).Value = player.Association
             column = column + 1
-        Next Player
+        Next p
     Next i
 
-
-    AssociationClash groups, numberOfEntries, numberOfGroups
 End Sub
 
 
 
-
+' THIS CAN BE MADE MORE EFFICIENT
 Private Function CreatePlayers(numberOfEntries As Integer) As Collection
     Dim players As New Collection
     Dim p As Player
@@ -160,66 +214,68 @@ Private Function CreatePlayers(numberOfEntries As Integer) As Collection
 End Function
 
 
-' Calculates the next group and the position in that group
-Private Function ChangeGroup(groupNumber As Integer, groupPosition As Integer, numberOfGroups As Integer, direction As Integer) As Variant
-    Dim results(1 To 3) As Integer
- 
-    If groupNumber = 1 And direction = -1 Then
-        results(1) = groupNumber
-        results(2) = groupPosition + 1
-        results(3) = 1
-    ElseIf groupNumber = numberOfGroups And direction = 1 Then
-        results(1) = groupNumber
-        results(2) = groupPosition + 1
-        results(3) = -1
-    Else
-        results(1) = groupNumber + direction
-        results(2) = groupPosition
-        results(3) = direction
-    End If
-    
-    ChangeGroup = results 
+' Builds the path the snake will follow
+Private Function BuildSnakePath(number_of_groups As Integer, max_group_size As Integer)
+    Dim snake_path() As Variant
+    Dim i As Integer
+    Dim group As Integer
+    Dim position As Integer
+    Dim direction As Integer
+    Dim places As Integer
+
+    places = number_of_groups * max_group_size
+
+    ReDim snake_path(1 To places, 1 To 2)
+
+    group = 1
+    position = 1
+    direction = 1
+
+    For i = 1 To places
+        snake_path(i, 1) = group
+        snake_path(i, 2) = position
+
+        'Change direction at ends
+        If direction = 1 Then
+            If group = number_of_groups Then
+                direction = -1
+                position = position + 1
+            Else
+                group = group + 1
+            End If
+        Else
+            If group = 1 Then
+                direction = 1
+                position = position + 1
+            Else
+                group = group - 1
+            End If
+        End If
+    Next i
+
+    BuildSnakePath = snake_path
 End Function
 
 
-Sub AssociationClash(groups() As Collection, numberOfEntries As Integer, numberOfGroups As Integer)
-    Dim groupNumber As Integer
-    Dim groupPosition As Integer
-    Dim direction As Integer
-    Dim i As Integer
-    Dim j As Integer
-    Dim association As String
-    Dim clash As Boolean
-    Dim newGroup As Integer
-    Dim newPosition As Integer
-    Dim newDirection As Integer
+' Counts the number of association clashes in a given group
+Private Function HasAssociationClash(group As Variant, association As String) As Integer
+    Dim player As Variant
+    Dim number_of_clashes As Integer
 
-    ' Initialize variables
-    groupNumber = numberOfGroups
-    groupPosition = 2
-    direction = -1
+    number_of_clashes = 0
 
-    ' goes through the groups in the same way as snake system
-    For i = numberOfGroups + 1 To numberOfEntries
-        ' gets the specific players association
-        association = groups(groupNumber).Item(groupPosition).Association
-
-        ' Goes through all the previous players in the same group
-        ' to find any clashes
-        clash = False
-        For j = 1 To groupPosition - 1
-            If association = groups(groupNumber).Item(j).Association Then
-                clash = True
-                Exit For
+    For Each player In group
+        If Not IsEmpty(player) And IsObject(player) Then
+            If TypeName(player) = "Player" Then
+                If player.Association = association Then
+                    number_of_clashes = number_of_clashes + 1
+                End If
             End If
-        Next j
+        End If
+    Next player
 
-        ' if there is a clash then search through the groups using the changegroup sub
-        ' to find a group where there is no clash
-        ' once a group is found put the player in that group and position
-        ' this moves everyone else down a group/position
-    Next i
-End Sub
+    HasAssociationClash = number_of_clashes
+End Function
 
 Sub RandomDraw()
 End Sub
