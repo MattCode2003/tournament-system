@@ -176,37 +176,31 @@ Sub SnakeDraw(number_of_entries As Integer, number_of_groups As Integer, max_gro
 
 
     ' puts the groups on excel
-    Dim column As Integer
-    For i = 1 To number_of_groups
-        column = Cells(1, Columns.Count).End(xlToLeft).Column + 1
-        Dim p As Integer
-        For p = LBound(groups(i)) To UBound(groups(i))
-            Set player = groups(i)(p)
-            Cells(i + 1, column).Value = player.LicenceNumber
-            column = column + 1
-            Cells(i + 1, column).Value = player.Name
-            column = column + 1
-            Cells(i + 1, column).Value = player.Association
-            column = column + 1
-        Next p
-    Next i
+    Call PrintGroups(groups, number_of_groups)
 
 End Sub
 
 
 
-' THIS CAN BE MADE MORE EFFICIENT
-Private Function CreatePlayers(numberOfEntries As Integer) As Collection
+' Grabs the players and stores them in a collection
+Private Function CreatePlayers(number_of_entries As Integer) As Collection
     Dim players As New Collection
     Dim p As Player
-    Dim i As Integer
+    Dim data_range As Variant
+    Dim i as Integer
+    Dim start_row As Integer
+    Dim skip_count As Integer
 
-    For i = 2 + Cells(numberOfEntries + 2, 2).Value To numberOfEntries + 1
+    skip_count = Cells(number_of_entries + 2, 2).Value
+    start_row = 2 + skip_count
+
+    data_range = Range(Cells(start_row, 1), Cells(number_of_entries + 1, 3)).Value
+
+    For i = 1 To UBound(data_range, 1)
         Set p = New Player
-        p.LicenceNumber = Cells(i, 1)
-        p.Name = Cells(i, 2)
-        p.Association = Cells(i, 3)
-        
+        p.LicenceNumber = data_range(i, 1)
+        p.Name = data_range(i, 2)
+        p.Association = data_range(i, 3)
         players.Add p
     Next i
 
@@ -215,46 +209,34 @@ End Function
 
 
 ' Builds the path the snake will follow
-Private Function BuildSnakePath(number_of_groups As Integer, max_group_size As Integer)
+Private Function BuildSnakePath(number_of_groups As Integer, max_group_size As Integer) As Variant
     Dim snake_path() As Variant
-    Dim i As Integer
-    Dim group As Integer
-    Dim position As Integer
-    Dim direction As Integer
-    Dim places As Integer
+    Dim i As Integer, g As Integer, p As Integer
+    Dim index As Integer: index = 1
 
-    places = number_of_groups * max_group_size
+    ReDim snake_path(1 To number_of_groups * max_group_size, 1 To 2)
 
-    ReDim snake_path(1 To places, 1 To 2)
-
-    group = 1
-    position = 1
-    direction = 1
-
-    For i = 1 To places
-        snake_path(i, 1) = group
-        snake_path(i, 2) = position
-
-        'Change direction at ends
-        If direction = 1 Then
-            If group = number_of_groups Then
-                direction = -1
-                position = position + 1
-            Else
-                group = group + 1
-            End If
+    For p = 1 To max_group_size
+        If p Mod 2 = 1 Then
+            ' Forward direction
+            For g = 1 To number_of_groups
+                snake_path(index, 1) = g     ' Group number
+                snake_path(index, 2) = p     ' Position within group
+                index = index + 1
+            Next g
         Else
-            If group = 1 Then
-                direction = 1
-                position = position + 1
-            Else
-                group = group - 1
-            End If
+            ' Reverse direction
+            For g = number_of_groups To 1 Step -1
+                snake_path(index, 1) = g
+                snake_path(index, 2) = p
+                index = index + 1
+            Next g
         End If
-    Next i
+    Next p
 
     BuildSnakePath = snake_path
 End Function
+
 
 
 ' Counts the number of association clashes in a given group
@@ -276,6 +258,29 @@ Private Function HasAssociationClash(group As Variant, association As String) As
 
     HasAssociationClash = number_of_clashes
 End Function
+
+
+' Puts the groups on excel
+Private Sub PrintGroups(groups As Variant, number_of_groups As Integer)
+    Dim column As Integer
+    Dim p As Integer
+    Dim i As Integer
+    Dim player As Player
+
+
+    For i = 1 To number_of_groups
+        column = Cells(1, Columns.Count).End(xlToLeft).Column + 1
+        For p = LBound(groups(i)) To UBound(groups(i))
+            Set player = groups(i)(p)
+            Cells(i + 1, column).Value = player.LicenceNumber
+            column = column + 1
+            Cells(i + 1, column).Value = player.Name
+            column = column + 1
+            Cells(i + 1, column).Value = player.Association
+            column = column + 1
+        Next p
+    Next i
+End Sub
 
 Sub RandomDraw()
 End Sub
