@@ -20,13 +20,11 @@ Private Sub DrawSheet_Click()
 End Sub
 
 Private Sub SingleGroupSheets_Click()
-    mode = 2
-    Me.Hide
+    Call Group_Sheets.SingleEventGroupSheet()
 End Sub
 
 Private Sub MutipleGroupSheets_Click()
-    mode = 3
-    Me.Hide
+    Call Group_Sheets.AllEventGroupSheets()
 End Sub
 
 Private Sub ExitButton_Click()
