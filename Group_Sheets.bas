@@ -89,12 +89,6 @@ Private Function GetUniqueValues() As Variant
 End Function
 
 
-' Creates the group sheets for an event
-Private Sub CreateGroupSheet(groups As Collection)
-    Debug.Print wb.Sheets("Draw").Cells(start_row, 6).Value
-End Sub
-
-
 ' Gets the groups for the event
 Private Function GetGroupsFromSheet(start_row As Long) As Collection
     Dim groups As New Collection
@@ -135,3 +129,9 @@ Private Function GetGroupsFromSheet(start_row As Long) As Collection
 
     Set GetGroupsFromSheet = groups
 End Function
+
+
+' Creates the group sheets for an event
+Private Sub CreateGroupSheet(groups As Collection)
+    Debug.Print wb.Sheets("Draw").Cells(start_row, 6).Value
+End Sub
