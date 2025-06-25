@@ -117,8 +117,9 @@ Private Function GetGroupsFromSheet(start_row As Long) As Collection
 
         ' Adds the players in that group to the collection
         For i = 1 To UBound(data_array, 2) / 3
-            Set player = New Player
             col = (i * 3) - 2
+            If data_array(row, col) = "" Then Exit For
+            Set player = New Player
             player.LicenceNumber = data_array(row, col)
             player.Name = data_array(row, col + 1)
             player.Association = data_array(row, col + 2)
