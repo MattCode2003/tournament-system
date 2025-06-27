@@ -7,6 +7,7 @@ Private Const DATA_FILE_NAME As String = "data.xlsx"
 Public events As Variant
 
 
+' Activated by button
 Sub AllEventGroupSheets()
     ' Set data.xlsx file location
     DataFilePath = ThisWorkbook.path & UtilityFunctions.GetDelimiter(ThisWorkbook.path) & DATA_FILE_NAME
@@ -15,6 +16,7 @@ Sub AllEventGroupSheets()
 End Sub
 
 
+' Activated by button
 Sub SingleEventGroupSheet()
     Dim form As New EventSelectionForm
     Dim unique_values_index As Variant
@@ -39,7 +41,7 @@ Sub SingleEventGroupSheet()
     ' Gets the starting row and creates the group sheet
     For i = 0 To UBound(unique_values_index)
         If unique_values_index(i, 0) = form.selected_event_value Then
-            Call CreateGroupSheet(GetGroupsFromSheet(CLng(unique_values_index(i, 1))), form.selected_event_value)
+            Call CreateGroupSheet(GetGroupsFromSheet(CLng(unique_values_index(i, 1))), form.selected_event_value, CLng(unique_values_index(i, 1)))
             Exit For
         End If
     Next i
@@ -133,13 +135,26 @@ End Function
 
 
 ' Creates the group sheets for an event
-Private Sub CreateGroupSheet(groups As Collection, event_name As String)
+Private Sub CreateGroupSheet(groups As Collection, event_name As String, start_row As Long)
     Dim group_sheet_output_path As String
     Dim group_sheet_file As Workbook
     Dim group_sheet As Worksheet
     Dim xl_app As Excel.Application
     Dim fso As Object
     Dim group_number As Long
+    Dim tournament_name As String
+    Dim start_time As String
+    Dim tables As Variant
+    Dim start_times As Variant
+    Dim dates As Variant
+    Dim tournament_name As String
+
+    ' Gets all the initial info required such as time and table
+    start_times = ws.Range("C" & start_row & ":C" & start_row + groups.Count).Value
+    tables = Call GetTableNumbers(groups.Count, start_row)
+    dates = ws.Range("A" & start_row & ":A" & start_row + groups.Count).Value
+    tournament_name = ThisWorkbook.Worksheets("General Settings").Cells(3, 2).Value
+
 
     group_sheet_output_path = ThisWorkbook.Path & Application.PathSeparator & "group sheets"
 
@@ -165,7 +180,14 @@ Private Sub CreateGroupSheet(groups As Collection, event_name As String)
         ' Actually creates the group sheet
         Select Case group.Count
             Case 3
-                Group_Creation.Group3()
+                Group_Creation.Group3(tournament_name, event_name, group_number, start_times(group_number), tables(group_number), dates(group_number))
+            Case 4
+                Group_Creation.Group4(tournament_name, event_name, group_number, start_times(group_number), tables(group_number), dates(group_number))
+            Case 5
+                Group_Creation.Group5(tournament_name, event_name, group_number, start_times(group_number), tables(group_number), dates(group_number))
+            Case 6
+                Group_Creation.Group6(tournament_name, event_name, group_number, start_times(group_number), tables(group_number), dates(group_number))
+        End Select
         group_number = group_number + 1
     Next group
 
@@ -177,3 +199,15 @@ Private Sub CreateGroupSheet(groups As Collection, event_name As String)
     xl_app.Quit
 
 End Sub
+
+
+' Gets the table numbers for the groups
+Private Function GetTableNumbers(number_of_groups As Long, start_row As Long) As Variant
+    Dim col As Long
+
+    ' Gets the column the table numbers are stored
+    col = ws.Cells(start_row, Columns.Count).End(xlToLeft).Column + 2
+
+    ' Gets all the table values
+    GetTableNumbers = ws.Range(col & start_row & ":" & col & start_row + number_of_groups).Value
+End Function
