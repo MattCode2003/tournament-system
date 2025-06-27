@@ -16,8 +16,8 @@ Attribute VB_Exposed = False
 
 Private selected_event As String
 
-Public Property Get selected_event_Value() As String
-   selected_event_Value = selected_event
+Public Property Get selected_event_value() As String
+   selected_event_value = selected_event
 End Property
 
 Private Sub UserForm_Initialize

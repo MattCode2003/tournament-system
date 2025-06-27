@@ -38,8 +38,8 @@ Sub SingleEventGroupSheet()
 
     ' Gets the starting row and creates the group sheet
     For i = 0 To UBound(unique_values_index)
-        If unique_values_index(i, 0) = form.selected_event_Value Then
-            Call CreateGroupSheet(GetGroupsFromSheet(CLng(unique_values_index(i, 1))))
+        If unique_values_index(i, 0) = form.selected_event_value Then
+            Call CreateGroupSheet(GetGroupsFromSheet(CLng(unique_values_index(i, 1))), form.selected_event_value)
             Exit For
         End If
     Next i
@@ -133,6 +133,47 @@ End Function
 
 
 ' Creates the group sheets for an event
-Private Sub CreateGroupSheet(groups As Collection)
-    Debug.Print wb.Sheets("Draw").Cells(start_row, 6).Value
+Private Sub CreateGroupSheet(groups As Collection, event_name As String)
+    Dim group_sheet_output_path As String
+    Dim group_sheet_file As Workbook
+    Dim group_sheet As Worksheet
+    Dim xl_app As Excel.Application
+    Dim fso As Object
+    Dim group_number As Long
+
+    group_sheet_output_path = ThisWorkbook.Path & Application.PathSeparator & "group sheets"
+
+    ' Creates destination folder if not already created
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    If Not fso.FolderExists(group_sheet_output_path) Then
+        fso.CreateFolder group_sheet_output_path
+    End If
+
+    ' Creates new output workbook
+    Set xl_app = New Excel.Application
+    xl_app.Visible = False
+    Set group_sheet_file = xl_app.Workbooks.Add
+    group_sheet_file.SaveAs Filename:= group_sheet_output_path & Application.PathSeparator & event_name & ".xlsx"
+
+    ' Loops through each group
+    group_number = 1
+
+    For Each group In groups
+        Set group_sheet = group_sheet_file.Worksheets.Add(After:=group_sheet_file.Worksheets(group_sheet_file.Worksheets.Count))
+        group_sheet.Name = group_number
+        
+        ' Actually creates the group sheet
+        Select Case group.Count
+            Case 3
+                Group_Creation.Group3()
+        group_number = group_number + 1
+    Next group
+
+    ' Removes the sheet created by default
+    Application.DisplayAlerts = False
+    group_sheet_file.Worksheets(1).Delete
+    Application.DisplayAlerts = True
+    group_sheet_file.Close SaveChanges:=True
+    xl_app.Quit
+
 End Sub
