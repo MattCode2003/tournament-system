@@ -147,14 +147,12 @@ Private Sub CreateGroupSheet(groups As Collection, event_name As String, start_r
     Dim tables As Variant
     Dim start_times As Variant
     Dim dates As Variant
-    Dim tournament_name As String
 
     ' Gets all the initial info required such as time and table
     start_times = ws.Range("C" & start_row & ":C" & start_row + groups.Count).Value
-    tables = Call GetTableNumbers(groups.Count, start_row)
+    tables = GetTableNumbers(groups.Count, start_row)
     dates = ws.Range("A" & start_row & ":A" & start_row + groups.Count).Value
     tournament_name = ThisWorkbook.Worksheets("General Settings").Cells(3, 2).Value
-
 
     group_sheet_output_path = ThisWorkbook.Path & Application.PathSeparator & "group sheets"
 
@@ -180,13 +178,13 @@ Private Sub CreateGroupSheet(groups As Collection, event_name As String, start_r
         ' Actually creates the group sheet
         Select Case group.Count
             Case 3
-                Group_Creation.Group3(tournament_name, event_name, group_number, start_times(group_number), tables(group_number), dates(group_number))
+                Call Group_Sheet_Design.Group3(group_sheet, tournament_name, event_name, group_number, Format(start_times(group_number, 1), "hh:mm"), CStr(tables(group_number, 1)), CStr(dates(group_number, 1)), group)
             Case 4
-                Group_Creation.Group4(tournament_name, event_name, group_number, start_times(group_number), tables(group_number), dates(group_number))
+                Call Group_Sheet_Design.Group4(group_sheet, tournament_name, event_name, group_number, Format(start_times(group_number, 1), "hh:mm"), CStr(tables(group_number, 1)), CStr(dates(group_number, 1)), group)
             Case 5
-                Group_Creation.Group5(tournament_name, event_name, group_number, start_times(group_number), tables(group_number), dates(group_number))
+                Call Group_Sheet_Design.Group5(group_sheet, tournament_name, event_name, group_number, Format(start_times(group_number, 1), "hh:mm"), CStr(tables(group_number, 1)), CStr(dates(group_number, 1)), group)
             Case 6
-                Group_Creation.Group6(tournament_name, event_name, group_number, start_times(group_number), tables(group_number), dates(group_number))
+                Call Group_Sheet_Design.Group6(group_sheet, tournament_name, event_name, group_number, Format(start_times(group_number, 1), "hh:mm"), CStr(tables(group_number, 1)), CStr(dates(group_number, 1)), group)
         End Select
         group_number = group_number + 1
     Next group
