@@ -13,11 +13,15 @@ Private Const FONT As String = "Calibri"
 
 
 
-
+'================================================================================ Group of 3 ================================================================================
 
 
 Sub Group3(ws As worksheet, tournament_name As String, event_name As String, group_number As Long, start_time As String, table As String, dates As String, group As Variant)
 End Sub
+
+
+'================================================================================ Group of 4 ================================================================================
+
 
 Sub Group4(ws As worksheet, tournament_name As String, event_name As String, group_number As Long, start_time As String, table As String, dates As String, group As Variant)
     Dim i As Integer ' General For loop index
@@ -27,14 +31,16 @@ Sub Group4(ws As worksheet, tournament_name As String, event_name As String, gro
     
     ' Column Widths
     ws.Range("A1:BO1").EntireColumn.ColumnWidth = 1
-    ws.Rows("1:3").RowHeight = 18.5
-    ws.Rows(4).RowHeight = 29
-    ws.Rows(5).RowHeight = 26
-    ws.Rows("6:9").RowHeight = 30
-    ws.Rows(10).RowHeight = 29
-    ws.Rows(11).RowHeight = 16
-    ws.Rows("12:23").RowHeight = 31
-    ws.Rows(31).RowHeight = 22
+
+    ' Row heights
+    ws.Rows("1:3").RowHeight = 18.5         ' Table 1
+    ws.Rows(4).RowHeight = 29               ' Gap between Table 1 and 2/3
+    ws.Rows(5).RowHeight = 26               ' Table 2/3 Header
+    ws.Rows("6:9").RowHeight = 30           ' Table 2/3 Info
+    ws.Rows(10).RowHeight = 29              ' Gap between Table 2/3 and 4
+    ws.Rows(11).RowHeight = 16              ' Table 4 Header
+    ws.Rows("12:23").RowHeight = 31         ' Table 4 Info
+    ws.Rows(31).RowHeight = 22              ' Table 5
 
     ' Table 1
     Call Table1Format(ws.Range("A1:AX1"), "Tournament: " & tournament_name, 14)
