@@ -54,10 +54,10 @@ Sub Group4(ws As worksheet, tournament_name As String, event_name As String, gro
     ' Creates the "For Referee's use in case of a tie" text box
     With ws.Shapes.AddTextbox( _
             Orientation:=msoTextOrientationHorizontal, _
-            Left:=389.0454, _
-            Top:=72.31819, _
+            Left:=433.3125, _
+            Top:=70, _
             Width:=108.692, _
-            Height:=13)
+            Height:=10)
 
         .TextFrame.Characters.Text = "For Referee's use in case of a tie"
         .TextFrame2.TextRange.Font.Size = 7
