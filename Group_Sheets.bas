@@ -40,6 +40,8 @@ Sub EventGroupSheet(mode As String)
             Call CreateGroupSheet(GetGroupsFromSheet(CLng(unique_values_index(i, 1))), CStr(unique_values_index(i, 0)), CLng(unique_values_index(i, 1)))
         End If
     Next i
+
+    MsgBox("Group Sheet Creation Completed")
 End Sub
 
 
