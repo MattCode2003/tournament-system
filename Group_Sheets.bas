@@ -8,16 +8,7 @@ Public events As Variant
 
 
 ' Activated by button
-Sub AllEventGroupSheets()
-    ' Set data.xlsx file location
-    DataFilePath = ThisWorkbook.path & UtilityFunctions.GetDelimiter(ThisWorkbook.path) & DATA_FILE_NAME
-    Set wb = Workbooks.Open(DataFilePath)
-    Set ws = wb.Sheets("Draw")
-End Sub
-
-
-' Activated by button
-Sub SingleEventGroupSheet()
+Sub EventGroupSheet(mode As String)
     Dim form As New EventSelectionForm
     Dim unique_values_index As Variant
     Dim i As Long
@@ -36,16 +27,19 @@ Sub SingleEventGroupSheet()
     Next i
 
     ' Gets the event from the user
-    form.Show
+    If mode = "SINGLE" Then form.Show
 
     ' Gets the starting row and creates the group sheet
     For i = 0 To UBound(unique_values_index)
-        If unique_values_index(i, 0) = form.selected_event_value Then
-            Call CreateGroupSheet(GetGroupsFromSheet(CLng(unique_values_index(i, 1))), form.selected_event_value, CLng(unique_values_index(i, 1)))
-            Exit For
+        If mode = "SINGLE" Then
+            If unique_values_index(i, 0) = form.selected_event_value Then
+                Call CreateGroupSheet(GetGroupsFromSheet(CLng(unique_values_index(i, 1))), form.selected_event_value, CLng(unique_values_index(i, 1)))
+                Exit For
+            End If
+        Else
+            Call CreateGroupSheet(GetGroupsFromSheet(CLng(unique_values_index(i, 1))), CStr(unique_values_index(i, 0)), CLng(unique_values_index(i, 1)))
         End If
     Next i
-
 End Sub
 
 

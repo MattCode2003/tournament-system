@@ -20,11 +20,11 @@ Private Sub DrawSheet_Click()
 End Sub
 
 Private Sub SingleGroupSheets_Click()
-    Call Group_Sheets.SingleEventGroupSheet()
+    Call Group_Sheets.EventGroupSheet("SINGLE")
 End Sub
 
 Private Sub MutipleGroupSheets_Click()
-    Call Group_Sheets.AllEventGroupSheets()
+    Call Group_Sheets.EventGroupSheet("ALL")
 End Sub
 
 Private Sub ExitButton_Click()
