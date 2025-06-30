@@ -447,10 +447,148 @@ Sub Group5(ws As worksheet, tournament_name As String, event_name As String, gro
 End Sub
 
 
-'================================================================================ Group of 5 ================================================================================
+'================================================================================ Group of 6 ================================================================================
 
 
 Sub Group6(ws As worksheet, tournament_name As String, event_name As String, group_number As Long, start_time As String, table As String, dates As String, group As Variant)
+    Dim i As Integer ' General For loop index
+    Dim row As Integer
+    Dim player_letter_locations As Variant
+    Dim umpire_letter_locations As Variant
+    
+    ' Column Widths
+    ws.Range("A1:BO1").EntireColumn.ColumnWidth = 1
+
+    ' Row heights
+    ws.Rows("1:3").RowHeight = 18.5         ' Table 1
+    ws.Rows(4).RowHeight = 16               ' Gap between Table 1 and 2/3
+    ws.Rows(5).RowHeight = 16               ' Table 2/3 Header
+    ws.Rows("6:11").RowHeight = 21          ' Table 2/3 Info
+    ws.Rows(12).RowHeight = 15.5              ' Gap between Table 2/3 and 4
+    ws.Rows(13).RowHeight = 16              ' Table 4 Header
+    ws.Rows("14:43").RowHeight = 24         ' Table 4 Info
+    ws.Rows(45).RowHeight = 22              ' Table 5
+
+    ' Table 1
+    Call Table1Format(ws.Range("A1:AX1"), "Tournament: " & tournament_name, 14)
+    Call Table1Format(ws.Range("A2:AX2"), "Event: " & event_name, 14)
+    Call Table1Format(ws.Range("A3:AX3"), "Group: " & group_number, 14)
+    Call Table1Format(ws.Range("AY1:BO1"), "Time: " & start_time, 14)
+    Call Table1Format(ws.Range("AY2:BO2"), "Table: " & table, 14)
+    Call Table1Format(ws.Range("AY3:BO3"), "Date: " & dates, 14)
+    
+
+    ' Creates the "For Referee's use in case of a tie" text box
+    With ws.Shapes.AddTextbox( _
+            Orientation:=msoTextOrientationHorizontal, _
+            Left:=433.3125, _
+            Top:=60, _
+            Width:=108.692, _
+            Height:=10)
+
+        .TextFrame.Characters.Text = "For Referee's use in case of a tie"
+        .TextFrame2.TextRange.Font.Size = 7
+        .TextFrame2.TextRange.Font.Name = "Calibri (Body)"
+        .Line.Visible = msoFalse
+    End With
+
+    ' Table 2 headers
+    Call TableHeader(ws.Range("B5:D5"), "", "left", 11, False)
+    Call TableHeader(ws.Range("E5:J5"), "Licence No", "centre", 11, False)
+    Call TableHeader(ws.Range("K5:AG5"), "Full Name", "centre", 11, True)
+    Call TableHeader(ws.Range("AH5:AK5"), "County", "centre", 8, False)
+    Call TableHeader(ws.Range("AL5:AO5"), "Points", "centre", 8, False)
+    Call TableHeader(ws.Range("AP5:AS5"), "Position", "right", 8, False)
+
+    ' Table 2 Info
+    For i = 1 To 6
+        row = 5 + i
+        
+        Call TableInfoFormat(ws.Range("B" & row & ":D" & row), Chr(64 + i), True, i = 6, 14, 21, xlHAlignCenter, xlDouble, xlContinuous)
+        Call TableInfoFormat(ws.Range("E" & row & ":J" & row), group(i).LicenceNumber, True, i = 6, 14, 21)
+        Call TableInfoFormat(ws.Range("K" & row & ":AG" & row), group(i).Name, True, i = 6, 14, 21)
+        Call TableInfoFormat(ws.Range("AH" & row & ":AK" & row), group(i).Association, False, i = 6, 14, 21)
+        Call TableInfoFormat(ws.Range("AL" & row & ":AO" & row), "", False, i = 6, 14, 21)
+        Call TableInfoFormat(ws.Range("AP" & row & ":AS" & row), "", False, i = 6, 14, 21, xlHAlignCenter, xlContinuous, xlDouble)
+    Next i
+
+     ' Table 3 Headers
+    Call TableHeader(ws.Range("AW5:BB5"), "Sets", "left", 11, False)
+    Call TableHeader(ws.Range("BC5:BH5"), "Games", "centre", 11, False)
+    Call TableHeader(ws.Range("BI5:BN5"), "Points", "right", 11, False)
+
+    ' Table 3 Info
+    For i = 1 To 6
+        row = 5 + i
+        Call TableInfoFormat(ws.Range("AW" & row & ":AY" & row), "", False, i = 6, 14, 21, xlHAlignCenter, xlDouble, xlDot)
+        Call TableInfoFormat(ws.Range("AZ" & row & ":BB" & row), "", False, i = 6, 14, 21, xlHAlignCenter, xlDot, xlContinuous)
+        Call TableInfoFormat(ws.Range("BC" & row & ":BE" & row), "", False, i = 6, 14, 21, xlHAlignCenter, xlContinuous, xlDot)
+        Call TableInfoFormat(ws.Range("BF" & row & ":BH" & row), "", False, i = 6, 14, 21, xlHAlignCenter, xlDot, xlContinuous)
+        Call TableInfoFormat(ws.Range("BI" & row & ":BK" & row), "", False, i = 6, 14, 21, xlHAlignCenter, xlContinuous, xlDot)
+        Call TableInfoFormat(ws.Range("BL" & row & ":BN" & row), "", False, i = 6, 14, 21, xlHAlignCenter, xlDot, xlDouble)
+    Next i
+
+    ' Table 4 Headers
+    Call TableHeader(ws.Range("A13:D13"), "", "left", 11, False)
+    Call TableHeader(ws.Range("E13:I13"), "Licence No", "centre", 9, False)
+    Call TableHeader(ws.Range("J13:Y13"), "Player", "centre", 12, True)
+    Call TableHeader(ws.Range("Z13:AN13"), "Coach", "centre", 12, True)
+    Call TableHeader(ws.Range("AO13:AQ13"), "Ump", "centre", 8, False)
+    Call TableHeader(ws.Range("AR13:AU13"), "Game 1", "centre", 8, False)
+    Call TableHeader(ws.Range("AV13:AY13"), "Game 2", "centre", 8, False)
+    Call TableHeader(ws.Range("AZ13:BC13"), "Game 3", "centre", 8, False)
+    Call TableHeader(ws.Range("BD13:BG13"), "Game 4", "centre", 8, False)
+    Call TableHeader(ws.Range("BH13:BK13"), "Game 5", "centre", 8, False)
+    Call TableHeader(ws.Range("BL13:BO13"), "Winner", "right", 8, False)
+
+    ' Table 4 Match Numbers
+    row = 1
+    For i = 14 To 42 Step 2
+        Call TableInfoFormat(ws.Range("A" & i & ":B" & i + 1), row, False, i = 42, 12, 21, xlHAlignCenter, xlDouble, xlContinuous)
+        row = row + 1
+    Next i
+
+    ' Create player orders
+    player_letter_locations = Array("A", "F", "B", "E", "C", "D", "A", "E", "F", "D", "B", "C", "A", "D", "C", "E", "F", "B", "A", "C", "D", "B", "E", "F", "A", "B", "C", "F", "D", "E")
+    umpire_letter_locations = Array("D", "A", "E", "B", "C", "F", "B", "A", "D", "E", "F", "C", "D", "A", "B")
+
+        ' Table 4 Info
+    For i = 0 To 29 Step 2
+        Call TableInfoFormat(ws.Range("C" & i + 14 & ":D" & i + 14), player_letter_locations(i), True, False, 12, 21)                                                                                              ' Top Player Letter
+        Call TableInfoFormat(ws.Range("E" & i + 14 & ":I" & i + 14), group(Asc(player_letter_locations(i)) - 64).LicenceNumber, False, False, 13, 21)                                                              ' Top Player Licence Number
+        Call TableInfoFormat(ws.Range("J" & i + 14 & ":Y" & i + 14), group(Asc(player_letter_locations(i)) - 64).Name, False, False, 13, 21, xlHAlignLeft)                                                         ' Top Player Name
+        Call TableInfoFormat(ws.Range("Z" & i + 14 & ":AN" & i + 14), "", False, False, 13, 21, xlHAlignLeft)                                                                                                      ' Top Coach
+        Call TableInfoFormat(ws.Range("AR" & i + 14 & ":AU" & i + 14), "", False, False, 13, 21)                                                                                                                   ' Top Game 1
+        Call TableInfoFormat(ws.Range("AV" & i + 14 & ":AY" & i + 14), "", False, False, 13, 21)                                                                                                                   ' Top Game 2
+        Call TableInfoFormat(ws.Range("AZ" & i + 14 & ":BC" & i + 14), "", False, False, 13, 21)                                                                                                                   ' Top Game 3
+        Call TableInfoFormat(ws.Range("BD" & i + 14 & ":BG" & i + 14), "", False, False, 13, 21)                                                                                                                   ' Top Game 4
+        Call TableInfoFormat(ws.Range("BH" & i + 14 & ":BK" & i + 14), "", False, False, 13, 21)                                                                                                                   ' Top Game 5
+        
+        Call TableInfoFormat(ws.Range("AO" & i + 14 & ":AQ" & i + 15), umpire_letter_locations(i / 2), False, i = 28, 13, 21)                                                                                      ' Umpire Letter
+        Call TableInfoFormat(ws.Range("BL" & i + 14 & ":BO" & i + 15), "", False, i = 28, 13, 21, xlHAlignCenter, xlContinuous, xlDouble)                                                                          ' Winner  
+
+        Call TableInfoFormat(ws.Range("C" & i + 15 & ":D" & i + 15), player_letter_locations(i + 1), True, i = 28, 12, 21, xlHAlignCenter, xlContinuous, xlContinuous, xlDot)                                      ' Bottom Player Letter
+        Call TableInfoFormat(ws.Range("E" & i + 15 & ":I" & i + 15), group(Asc(player_letter_locations(i + 1)) - 64).LicenceNumber, False, i = 28, 13, 21, xlHAlignCenter, xlContinuous, xlContinuous, xlDot)      ' Botttom Player Licence Number
+        Call TableInfoFormat(ws.Range("J" & i + 15 & ":Y" & i + 15), group(Asc(player_letter_locations(i + 1)) - 64).Name, False, i = 28, 13, 21, xlHAlignLeft, xlContinuous, xlContinuous, xlDot)                 ' Bottom Player Name
+        Call TableInfoFormat(ws.Range("Z" & i + 15 & ":AN" & i + 15), "", False, i = 28, 13, 21, xlHAlignLeft, xlContinuous, xlContinuous, xlDot)                                                                  ' Bottom Coach
+        Call TableInfoFormat(ws.Range("AR" & i + 15 & ":AU" & i + 15), "", False, i = 28, 13, 21, xlHAlignCenter, xlContinuous, xlContinuous, xlDot)                                                               ' Bottom Game 1
+        Call TableInfoFormat(ws.Range("AV" & i + 15 & ":AY" & i + 15), "", False, i = 28, 13, 21, xlHAlignCenter, xlContinuous, xlContinuous, xlDot)                                                               ' Bottom Game 2
+        Call TableInfoFormat(ws.Range("AZ" & i + 15 & ":BC" & i + 15), "", False, i = 28, 13, 21, xlHAlignCenter, xlContinuous, xlContinuous, xlDot)                                                               ' Bottom Game 3
+        Call TableInfoFormat(ws.Range("BD" & i + 15 & ":BG" & i + 15), "", False, i = 28, 13, 21, xlHAlignCenter, xlContinuous, xlContinuous, xlDot)                                                               ' Bottom Game 4
+        Call TableInfoFormat(ws.Range("BH" & i + 15 & ":BK" & i + 15), "", False, i = 28, 13, 21, xlHAlignCenter, xlContinuous, xlContinuous, xlDot)                                                               ' Bottom Game 5
+    Next i
+
+    ' Table 5
+    Call TableInfoFormat(ws.Range("AQ45:AV45"), "dc", False, True, 11, 21, xlHAlignCenter, xlDouble, xlContinuous, xlDouble)
+    Call TableInfoFormat(ws.Range("AW45:BB45"), "sc", False, True, 11, 21, xlHAlignCenter, xlContinuous, xlContinuous, xlDouble)
+    Call TableInfoFormat(ws.Range("BC45:BH45"), "wc", False, True, 11, 21, xlHAlignCenter, xlContinuous, xlDouble, xlDouble)
+
+    ws.Range("A1:BO45").Interior.Color = RGB(255, 255, 255)
+    With ws.PageSetup
+        .PrintArea = "A1:BO45"
+        .LeftMargin = 28.35
+        .RightMargin = 28.35
+    End With
 End Sub
 
 
